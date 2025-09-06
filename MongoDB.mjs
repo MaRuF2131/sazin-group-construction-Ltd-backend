@@ -16,7 +16,7 @@ const  mongo=async() => {
   try {
     if(db) return db
     /* await client.connect(); */
-    db = client.db('assignment-12');
+    db = client.db('sazin-construction');
     // Ensure the collection is created
     // Optional: Create index
     // await db.collection('users').createIndex({ email: 1 }, { unique: true });
