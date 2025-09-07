@@ -7,14 +7,18 @@
   "type": "module",
   "main": "index.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon index.mjs"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "firebase": "^12.2.1",
+    "firebase-admin": "^13.5.0",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.19.0"
+    "mongodb": "^6.19.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
   }
 }
