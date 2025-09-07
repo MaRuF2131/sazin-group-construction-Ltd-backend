@@ -1,13 +1,11 @@
-import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import express from 'express';
 import mongo from './MongoDB.mjs';
+import { uploadImageMiddleware } from './utils/CDN/ImageUpload.mjs';
+
 dotenv.config();
-import { MongoClient, ServerApiVersion } from 'mongodb';
 /* import cookieParser from 'cookie-parser'; */
-import jwt from 'jsonwebtoken';
-
-
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -23,13 +21,28 @@ app.use(express.urlencoded({ extended: true }));
 let db;
 (async () => {
   try {
-
-    db = await mongo()
+    db = await mongo();
   } catch (err) {
     console.error('❌ MongoDB connection error:', err);
   }
 })();
 
+app.post('/add-product', uploadImageMiddleware, async (req, res) => {
+  try {
+    console.log(req.file?.firebaseUrl);
+
+    // Validate and process productData
+    // ...
+
+    res.status(201).json({
+      message: 'Product added successfully',
+      imageUrl: req.file.firebaseUrl,
+    });
+  } catch (error) {
+    console.error('Error adding product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 /// listening
 app.listen(port, () => {

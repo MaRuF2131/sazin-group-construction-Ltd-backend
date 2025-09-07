@@ -1,5 +1,6 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
+import mongo from '../MongoDB.mjs';
 dotenv.config();
 const router = express.Router();
 
@@ -7,8 +8,7 @@ const router = express.Router();
 let db;
 (async () => {
   try {
-
-    db = await mongo()
+    db = await mongo();
   } catch (err) {
     console.error('❌ MongoDB connection error:', err);
   }
@@ -16,9 +16,12 @@ let db;
 
 router.post('/add-project', async (req, res) => {
   try {
-    const projectData = req.body;   
+    const projectData = req.body;
     const result = await db.collection('projects').insertOne(projectData);
-    res.status(201).json({ message: 'Project added successfully', projectId: result.insertedId });
+    res.status(201).json({
+      message: 'Project added successfully',
+      projectId: result.insertedId,
+    });
   } catch (error) {
     console.error('Error adding project:', error);
     res.status(500).json({ message: 'Internal server error' });
