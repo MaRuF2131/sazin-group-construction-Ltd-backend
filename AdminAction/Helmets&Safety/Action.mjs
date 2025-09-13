@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { uploadImageMiddleware } from './ImageUpload.mjs';
+import { uploadImageMiddleware } from '../utils/CDN/ImageUpload.mjs';
 
 const router = Router();
 

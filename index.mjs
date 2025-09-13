@@ -2,19 +2,27 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongo from './MongoDB.mjs';
-import { uploadImageMiddleware } from './utils/CDN/ImageUpload.mjs';
 
 dotenv.config();
 /* import cookieParser from 'cookie-parser'; */
 
 const app = express();
 const port = process.env.PORT || 5000;
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // যদি origin না থাকে (যেমন Postman), তাও allow করব
+      callback(null, origin || true);
+    },
+    credentials: true, // কুকি/সেশন allow
+  })
+);
 app.use(express.json());
 /* app.use(cookieParser()); */
-app.use(express.urlencoded({ extended: true }));
+/* app.use(express.urlencoded({ extended: true })); */
 
 // MongoDB connection
 // MongoDB connection
@@ -27,22 +35,9 @@ let db;
   }
 })();
 
-app.post('/add-product', uploadImageMiddleware, async (req, res) => {
-  try {
-    console.log(req.file?.firebaseUrl);
-
-    // Validate and process productData
-    // ...
-
-    res.status(201).json({
-      message: 'Product added successfully',
-      imageUrl: req.file.firebaseUrl,
-    });
-  } catch (error) {
-    console.error('Error adding product:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Routes
+import AdminAction from './AdminAction/index.mjs';
+app.use('/admin-action', AdminAction);
 
 /// listening
 app.listen(port, () => {
