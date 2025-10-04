@@ -36,7 +36,7 @@ let db;
 })();
 
 // Encryption function
-    const encryptData = (data) => {
+const encryptData = (data) => {
         return CryptoJS.AES.encrypt(data, secretKey).toString();
     };
 
@@ -132,6 +132,7 @@ router.post("/register",upload.single('image'), Handler, fileCheck("profile"),as
     // Insert user
     let user = await db.collection("register").insertOne({
       ...encryptedData,
+      status: "pending",
       createdAt: new Date()
     });
 

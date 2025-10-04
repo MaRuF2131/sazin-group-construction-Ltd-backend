@@ -1,15 +1,10 @@
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
-import mongo from './MongoDB.mjs';
-
-dotenv.config();
-/* import cookieParser from 'cookie-parser'; */
+import cookieParser from 'cookie-parser';
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 5000;
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 // Middleware
 app.use(
   cors({
@@ -21,19 +16,8 @@ app.use(
   })
 );
 app.use(express.json());
-/* app.use(cookieParser()); */
-/* app.use(express.urlencoded({ extended: true })); */
-
-// MongoDB connection
-// MongoDB connection
-let db;
-(async () => {
-  try {
-    db = await mongo();
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
-  }
-})();
+app.use(cookieParser()); 
+app.use(express.urlencoded({ extended: true })); 
 
 // Routes
 import AdminAction from './AdminAction/index.mjs';

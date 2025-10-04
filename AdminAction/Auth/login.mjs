@@ -4,6 +4,7 @@ import mongo from '../../MongoDB.mjs';
 import jwt from 'jsonwebtoken';
 import CryptoJS from "crypto-js";
 import { upload } from '../../utils/uploadConfig.mjs';
+import { adminStatus } from '../../utils/adminStatus.mjs';
 import { 
   isSafeString,
   isValidEmail,
@@ -82,16 +83,13 @@ router.post("/login",upload.none(),async (req, res) => {
           // 🔹 Create email hash for duplicate check
           const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
           // এখানে তুমি database দিয়ে username/password check করবে
-          let user=await db.collection("register").findOne({
-            email: emailHash,
-          }) 
+          let user=await adminStatus(emailHash,"active");
 
           if (!user) {
-            console.log("❌ User not found for email hash:", emailHash);
-            
-            return res.status(401).json({ success: false, message: "Invalid credentials" });
-          } 
-          
+            console.log("❌ Active admin not found for email :", emailHash);
+            return res.status(401).json({ success: false, message: "active admin not found with this email" });
+          }
+          // Decrypt the stored password before comparison
           const decryptedPassword = decryptData(decryptData(user?.password, secretKey), decryptKey);
           if (decryptedPassword !== decryptedData.password) {
             console.log("❌ Password mismatch for user ID:", user._id,decryptedData);
@@ -99,11 +97,11 @@ router.post("/login",upload.none(),async (req, res) => {
           }
 
          user.name=decryptData(user?.name,secretKey);
-         user.email=encryptedData.email;
+         user.email=encryptedData?.email;
 
         // JWT token create
         const token = jwt.sign(
-         { uid: user._id, username: user.name,userEmail:user.email },
+         { uid: user?._id, username: user?.name, userEmail: user?.email },
            jwtSecret,
          { expiresIn: "7d" }
         );
@@ -119,10 +117,11 @@ router.post("/login",upload.none(),async (req, res) => {
 
         // Set cookie
         res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 7*24*60*60*1000,
-        sameSite: "strict"
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              path: '/',
+              maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
     // Success

@@ -1,8 +1,16 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import CryptoJS from "crypto-js";
 dotenv.config();
+
+const decryptKey = process.env.DEC;
+const decryptData = (ciphertext, Key) => {
+  const bytes = CryptoJS.AES.decrypt(ciphertext, Key);
+  return bytes.toString(CryptoJS.enc.Utf8);
+};
+
 const verifyJWT = (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req?.cookies?.token;
   const user = JSON.parse(req.headers['authorization']);
 
   if (!token || !user) {
@@ -16,10 +24,11 @@ const verifyJWT = (req, res, next) => {
        return res.status(401).json({ message: 'Unauthorized' });
     }
     req.user = decoded;
-    console.log("cookies", user);
-    console.log("Decoded user:", req.user);
-    
-    if (req.user.email !== user.email || req.user.username !== user.username || req.user.uid !== user.uid) {
+    req.user.userEmail = decryptData(req?.user?.userEmail, decryptKey);
+    req.user.username = decryptData(req?.user?.username, decryptKey);
+
+
+    if (req?.user?.userEmail !== user?.email || req?.user?.username !== user?.username || req?.user?.uid !== user?.uid) {
        console.log("⛔ User information does not match the token");
        return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -38,10 +47,9 @@ const verifyJWT = (req, res, next) => {
               path: '/',
             });
             const payload = {
-               username: user.displayName,
-                uid: user.uid,
-                 email: user.email,
-                  role: user.role || 'user'
+               username: user?.username,
+                uid: user?.uid,
+                 userEmail: user?.email,
              };
             const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
             // Set the new token in the cookie

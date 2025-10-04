@@ -14,6 +14,8 @@ import {
   runValidations,
   sanitizeMiddleware,
  } from '../../utils/validationCheck.mjs';
+import verifyJWT from '../../utils/VerifyJWT.mjs';
+import { adminStatus } from '../../utils/adminStatus.mjs';
 dotenv.config();
 const router = express.Router();
 const secretKey = process.env.ENC;
@@ -38,6 +40,18 @@ let db;
   }
 })();
 
+router.use(verifyJWT);
+/* router.use(async (req, res, next) => {
+  const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
+  // Check if user already exists using emailHash
+    const existingUser = await adminStatus(emailHash, "active");
+    if (!existingUser) {
+      return res.status(400).json({ message: "Active admin not found with this email" });
+    }
+    req.emailHash = emailHash;
+  next();
+}); */
+
 // Encryption function
     const encryptData = (data) => {
         return CryptoJS.AES.encrypt(data, secretKey).toString();
@@ -50,6 +64,11 @@ let db;
 
 const  Handler = async(req, res, next) => {
      try {
+        // bot submission check
+        if(req?.body?.id !=="MSTTAMANNAAKTERTOMA"){
+          return res.status(401).json({ message: "bot submission detected" });
+        }
+
     const field=["name","email","phone","position","department","company","location","joinDate","bio","linkedin","twitter"]
     const encryptedData = Object.fromEntries(
       Object.entries(req.body)
@@ -75,11 +94,17 @@ const  Handler = async(req, res, next) => {
       return [key, value];
     }));
 
+    if(req?.user?.userEmail !== decryptedData?.email){
+      return res.status(401).json({ message: "Unauthorized: Email mismatch" });
+    }
+
     // Mongo safety check
     if (!looksSafeForMongo(decryptedData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
     }
-
+     
+    console.log("Decrypted Data:", decryptedData);
+    
     // Validation
     const validations = {
       name: [[(v) => isSafeString(v, { max: 2000 }), "Invalid name"]],
@@ -103,16 +128,10 @@ const  Handler = async(req, res, next) => {
       encryptedData.name = enc;
 
     // 🔹 Create email hash for duplicate check
-    const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
-    encryptedData.email = emailHash;
+    const emailHash = CryptoJS.SHA256(decryptedData?.email).toString(CryptoJS.enc.Hex);
 
-    // Check if user already exists using emailHash
-    const existingUser = await db.collection("register").findOne({ email: emailHash });
-    if (!existingUser) {
-      return res.status(400).json({ message: "User not found with this email" });
-    }
     // Add emailHash to data before inserting
-    encryptedData.email = emailHash;
+    req.emailHash = emailHash;
     req.encryptedData = encryptedData;
     next();
   } catch (error) {
@@ -136,16 +155,20 @@ router.post("/profile-update",upload.single('image'), Handler, fileCheck("profil
         encryptedData.imagePublicId = null; // কোনো public_id নেই
       }
 
-    // Insert user
-    let user = await db.collection("register").insertOne({
-      ...encryptedData,
-      createdAt: new Date()
+    // Update user
+    let result = await db.collection("register").updateOne({
+      email: req?.emailHash,
+      status: "active"
+    }, {
+      $set: {
+        ...encryptedData,
+      }
     });
 
-    if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    if (result?.matchedCount === 0) {
+      return res.status(401).json({ success: false, message: "active admin not found with this email" });
     }
-    res.status(200).json({ success: true, message: "Registration successful", user: { uid: user._id, username: user.name, email: user.email, imageUrl: user.imageUrl } });
+    res.status(200).json({ success: true, message: "Profile update successful"});
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Server error" });
