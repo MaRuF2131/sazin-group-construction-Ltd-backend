@@ -18,5 +18,14 @@ router.use(
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 import AddAction from './Sazin-construction/AddAction.mjs';
+import getAction from './Sazin-construction/mangeAction/getAction.mjs'
+import login from './Auth/login.mjs';
+import register from './Auth/register.mjs';
+import profile_update from './Auth/profile-update.mjs';
 router.use('/sazin-construction/addAction', AddAction);
+router.use('/sazin-construction/manageAction/getAction', getAction);
+router.use('/Auth0777T',login);
+router.use('/Auth0778T',register);
+router.use('/Auth0779T',profile_update);
+
 export default router;

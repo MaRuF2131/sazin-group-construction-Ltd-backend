@@ -2,10 +2,10 @@ import sharp from "sharp";
 import { uploadToCloudinary } from "../utils/CDN/cloudinaryUpload.mjs";
 
 export const fileCheck = (folderName = "uploads") => {
+  console.log("fileCheck middleware initialized for folder:", folderName);
   return async (req, res, next) => {
     try {
       let imageData = null;
-
       if (req.file) {
         if (!req.file.mimetype.startsWith("image/")) {
           return res.status(400).json({ error: "Only image files are allowed!" });

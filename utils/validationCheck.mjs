@@ -298,6 +298,13 @@ export function isValidNumber(
   return value >= min && value <= max;
 }
 
+// phone number check
+export function isValidPhone(value) {
+  if (typeof value !== "string") return false;
+  const regex = /^\+?[1-9]\d{1,14}$/; // E.164 phone number format
+  return regex.test(value.trim());
+}
+
 // Email check
 export function isValidEmail(value) {
   if (typeof value !== "string") return false;

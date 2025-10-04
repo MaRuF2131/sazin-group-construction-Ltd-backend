@@ -112,7 +112,8 @@ router.post('/add-client',upload.none(), async (req, res) => {
 
     // validation rules (title, description ইত্যাদি)
     const validations = {
-      partner: [[(v) => isSafeString(v, { max: 2000 }), "Invalid partner name"]],
+      partner: [[(v) => isSafeString(v, { max:300 }), "Invalid partner name"]],
+      description:[[(v) => isSafeString(v, { max: 3000 }), "Invalid description"]],
     };
 
    const { isValid, errors } = runValidations(validations, clientData);
@@ -283,7 +284,7 @@ router.post('/add-achievement',upload.none(), async (req, res) => {
 router.post('/add-project', upload.single('image'),fileCheck("project"), async (req, res) => {
   try {
     const projectData = req.body;
-    const ct=["Civil","Electro"]
+    const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
     // ✅ Mongo safety check
     if (!looksSafeForMongo(projectData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
