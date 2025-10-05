@@ -3,6 +3,9 @@ import express from 'express';
 import { upload } from '../../utils/uploadConfig.mjs';
 import { fileCheck } from '../../utils/filecheck.mjs';
 import mongo from '../../MongoDB.mjs';
+import CryptoJS from "crypto-js";
+import verifyJWT from '../../utils/VerifyJWT.mjs';
+import { adminStatus } from '../../utils/adminStatus.mjs';
 import { 
   isSafeString,
   isValidDate,
@@ -33,10 +36,34 @@ let db;
   }
 })();
 
+router.use(verifyJWT);
+router.use(async (req, res, next) => {
+try{
+  const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
+    const existingUser = await adminStatus(emailHash, "active");
+    if (!existingUser) {      
+      return res.status(400).json({ message: "Active admin not found with this email" });
+    }
+    req.emailHash = emailHash;
+  next();
+  }catch(err){
+    console.error('Middleware error:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 //add service
 router.post('/add-service',upload.none(), async (req, res) => {
   try {
     const serviceData = req.body;
+    const field=["service","description"]
+    const missingFields = field.filter(f => !(f in serviceData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(serviceData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(serviceData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
@@ -70,7 +97,15 @@ router.post('/add-service',upload.none(), async (req, res) => {
 router.post('/add-equipment',upload.none(), async (req, res) => {
   try {
     const equipmentData = req.body;
-    console.log('equipmentData:', equipmentData);
+    const field=["equipment"]
+    const missingFields = field.filter(f => !(f in equipmentData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(equipmentData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     
     // ✅ Mongo safety check
     if (!looksSafeForMongo(equipmentData)) {
@@ -103,7 +138,15 @@ router.post('/add-equipment',upload.none(), async (req, res) => {
 router.post('/add-client',upload.none(), async (req, res) => {
   try {
     const clientData = req.body;
-    console.log('clientData:', clientData);
+    const field=["partner","description"]
+    const missingFields = field.filter(f => !(f in clientData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(clientData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
 
     // ✅ Mongo safety check
     if (!looksSafeForMongo(clientData)) {
@@ -137,7 +180,15 @@ router.post('/add-client',upload.none(), async (req, res) => {
 router.post('/add-job',upload.none(), async (req, res) => {
   try {
     const jobData = req.body;
-
+    const field=["deadline","jobType","job","description","location","salary"]
+    const missingFields = field.filter(f => !(f in jobData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(jobData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(jobData)) {
       return res.status(400).json({ message:"Unsafe data for MongoDB" });
@@ -176,7 +227,15 @@ router.post('/add-job',upload.none(), async (req, res) => {
 router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, res) => {
   try {
     const newsData = req.body;
-
+    const field=["newstitle","description",'author','date','image']
+    const missingFields = field.filter(f => !(f in newsData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(newsData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(newsData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
@@ -216,6 +275,15 @@ router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, r
 router.post('/add-certificate', upload.single('image'),fileCheck("certificate"), async (req, res) => {
   try {
     const certificateData = req.body;
+    const field=["certificateName","image"]
+    const missingFields = field.filter(f => !(f in certificateData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(certificateData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(certificateData )) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
@@ -252,6 +320,15 @@ router.post('/add-certificate', upload.single('image'),fileCheck("certificate"),
 router.post('/add-achievement',upload.none(), async (req, res) => {
   try {
     const achievementData = req.body;
+    const field=["achievement","description"]
+    const missingFields = field.filter(f => !(f in achievementData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(achievementData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(achievementData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
@@ -285,6 +362,16 @@ router.post('/add-project', upload.single('image'),fileCheck("project"), async (
   try {
     const projectData = req.body;
     const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
+
+    const field=["date","category","description","title",'image']
+    const missingFields = field.filter(f => !(f in projectData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(projectData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
     // ✅ Mongo safety check
     if (!looksSafeForMongo(projectData)) {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
@@ -301,6 +388,7 @@ router.post('/add-project', upload.single('image'),fileCheck("project"), async (
    if(!ct.includes(projectData?.category))return res.status(400).json({ message: "Catergory Not Under Listed" });
    if(projectData?.feature==='true')projectData.feature=true;
    else projectData.feature=false;
+
    const { isValid, errors } = runValidations(validations, projectData);
     if (!isValid) {
       return res.status(400).json({ message: errors });

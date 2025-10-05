@@ -11,6 +11,7 @@ import {
   runValidations,
   sanitizeMiddleware,
  } from '../../utils/validationCheck.mjs';
+import e from 'express';
 dotenv.config();
 const router = express.Router();
 const secretKey = process.env.ENC;
@@ -90,12 +91,13 @@ const  Handler = async(req, res, next) => {
     delete encryptedData.confirmPassword; // remove confirmPassword
 
     // Encrypt sensitive fields before storing
-    Object.entries(encryptedData).filter(([key]) => !['email', 'createdAt'].includes(key)).forEach(([key, value]) => {
+    Object.entries(encryptedData).filter(([key]) => !['createdAt'].includes(key)).forEach(([key, value]) => {
       const enc = encryptData(value);
       encryptedData[key] = enc;
     });
 
     // 🔹 Create email hash for duplicate check
+    encryptedData.eem=encryptedData?.email;
     const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
     encryptedData.email = emailHash;
 

@@ -2,17 +2,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongo from '../../MongoDB.mjs';
 import CryptoJS from "crypto-js";
-import { upload } from '../../utils/uploadConfig.mjs';
-import { fileCheck } from '../../utils/filecheck.mjs';
-import jwt from 'jsonwebtoken';
 import { 
-  isSafeString,
-  isValidDate,
   isValidEmail,
-  isValidPhone,
-  isValidUrl,
-  looksSafeForMongo,
-  runValidations,
   sanitizeMiddleware,
  } from '../../utils/validationCheck.mjs';
 import verifyJWT from '../../utils/VerifyJWT.mjs';
@@ -20,10 +11,6 @@ import { adminStatus } from '../../utils/adminStatus.mjs';
 import { ObjectId } from 'mongodb';
 dotenv.config();
 const router = express.Router();
-const secretKey = process.env.ENC;
-const decryptKey = process.env.DEC;
-const jwtSecret = process.env.JWT_SECRET;
-
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 // Apply sanitizer to all routes
@@ -45,18 +32,28 @@ let db;
 
 router.use(verifyJWT);
 router.use(async (req, res, next) => {
+try{
   const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
     const existingUser = await adminStatus(emailHash, "active");
     if (!existingUser) {
+        console.log("kkkkkkkkkk");       
       return res.status(400).json({ message: "Active admin not found with this email" });
     }
     req.emailHash = emailHash;
   next();
+  }catch(err){
+    console.error('Middleware error:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 router.get("/manage-admin", async (req, res) => {
   try {    
     const allAdmins = await db.collection('register').find({ email: { $ne: req.emailHash } }, { projection: { password: 0, __v: 0 } }).toArray();
+        allAdmins.forEach(admin => {
+          admin.eem = CryptoJS.AES.decrypt(admin?.eem, process.env.ENC).toString(CryptoJS.enc.Utf8);
+          admin.name = CryptoJS.AES.decrypt(admin?.name, process.env.ENC).toString(CryptoJS.enc.Utf8);
+    });
     res.status(200).json({ admins: allAdmins });
   } catch (error) {
     console.error('Error fetching admin data:', error);

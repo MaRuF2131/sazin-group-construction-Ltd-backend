@@ -1,5 +1,8 @@
 import express from "express";
 import mongo from "../../../MongoDB.mjs";
+import CryptoJS from "crypto-js";
+import verifyJWT from '../../../utils/VerifyJWT.mjs';
+import { adminStatus } from '../../../utils/adminStatus.mjs';
 const router=express.Router();
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
@@ -11,7 +14,21 @@ let db;
     console.error('❌ MongoDB connection error:', err);
   }
 })();
-
+router.use(verifyJWT);
+router.use(async (req, res, next) => {
+try{
+  const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
+    const existingUser = await adminStatus(emailHash, "active");
+    if (!existingUser) {      
+      return res.status(400).json({ message: "Active admin not found with this email" });
+    }
+    req.emailHash = emailHash;
+  next();
+  }catch(err){
+    console.error('Middleware error:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 router.get("/project", async (req, res) => {
   try {
     const { category, isFeature, page = 1, limit = 10 } = req.query;
