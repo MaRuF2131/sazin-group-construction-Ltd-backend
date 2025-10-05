@@ -4,6 +4,7 @@ import mongo from '../../MongoDB.mjs';
 import CryptoJS from "crypto-js";
 import { upload } from '../../utils/uploadConfig.mjs';
 import { fileCheck } from '../../utils/filecheck.mjs';
+import jwt from 'jsonwebtoken';
 import { 
   isSafeString,
   isValidDate,
@@ -20,6 +21,7 @@ dotenv.config();
 const router = express.Router();
 const secretKey = process.env.ENC;
 const decryptKey = process.env.DEC;
+const jwtSecret = process.env.JWT_SECRET;
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
@@ -41,20 +43,22 @@ let db;
 })();
 
 router.use(verifyJWT);
-/* router.use(async (req, res, next) => {
+router.use(async (req, res, next) => {
   const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
   // Check if user already exists using emailHash
+      console.log('req.body:', emailHash);
     const existingUser = await adminStatus(emailHash, "active");
     if (!existingUser) {
       return res.status(400).json({ message: "Active admin not found with this email" });
     }
+    req.imageUrl=existingUser?.imageUrl || "";
     req.emailHash = emailHash;
   next();
-}); */
+});
 
 // Encryption function
-    const encryptData = (data) => {
-        return CryptoJS.AES.encrypt(data, secretKey).toString();
+    const encryptData = (data, Key=secretKey) => {
+        return CryptoJS.AES.encrypt(data, Key).toString();
     };
 
     const decryptData = (ciphertext, Key) => {
@@ -103,7 +107,6 @@ const  Handler = async(req, res, next) => {
       return res.status(400).json({ message: "Unsafe data for MongoDB" });
     }
      
-    console.log("Decrypted Data:", decryptedData);
     
     // Validation
     const validations = {
@@ -126,13 +129,8 @@ const  Handler = async(req, res, next) => {
     // Encrypt sensitive fields before storing
       const enc = encryptData(encryptedData?.name);
       encryptedData.name = enc;
-
-    // 🔹 Create email hash for duplicate check
-    const emailHash = CryptoJS.SHA256(decryptedData?.email).toString(CryptoJS.enc.Hex);
-
-    // Add emailHash to data before inserting
-    req.emailHash = emailHash;
-    req.encryptedData = encryptedData;
+      delete encryptedData.email; // Remove email from data to be stored
+      req.encryptedData = encryptedData;
     next();
   } catch (error) {
     console.log(error); 
@@ -141,20 +139,16 @@ const  Handler = async(req, res, next) => {
 }
 
 // Profile Update API
-router.post("/profile-update",upload.single('image'), Handler, fileCheck("profile"),async (req, res) => {
+router.post("/profile-update",upload.single('profileImageFile'), Handler, fileCheck("profile"),async (req, res) => {
   try {
+    
     const encryptedData = req.encryptedData;  
     // Handle image upload
     if (req.imageData && req.imageData.secure_url) {
       console.log('Image uploaded:', req.imageData.secure_url);
       encryptedData.imageUrl = req.imageData.secure_url;
       encryptedData.imagePublicId = req.imageData.public_id;
-    } else {
-        // Default profile image
-        encryptedData.imageUrl = "https://yourdomain.com/default-profile.png"; // এখানে default URL দিন
-        encryptedData.imagePublicId = null; // কোনো public_id নেই
-      }
-
+    }
     // Update user
     let result = await db.collection("register").updateOne({
       email: req?.emailHash,
@@ -168,7 +162,36 @@ router.post("/profile-update",upload.single('image'), Handler, fileCheck("profil
     if (result?.matchedCount === 0) {
       return res.status(401).json({ success: false, message: "active admin not found with this email" });
     }
-    res.status(200).json({ success: true, message: "Profile update successful"});
+
+    // Generate new JWT
+     const username=decryptData(encryptedData?.name, secretKey);
+     const userEmail=encryptData(req?.user?.userEmail, decryptKey);
+
+       const token = jwt.sign(
+             { uid: req?.user?.uid, username: username, userEmail: userEmail },
+               jwtSecret,
+             { expiresIn: "7d" }
+            );
+    
+            const firebaseUser = {
+            uid: req?.user?.uid,
+            username: username,
+            photoURL: encryptedData?.imageUrl || req?.imageUrl || "",
+            email: userEmail,
+            token: token,
+            createdAt:new Date(),
+            };
+    
+            // Set cookie
+            res.cookie("token", token, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'strict',
+                  path: '/',
+                  maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+    res.status(200).json({ success: true, message: "Profile update successful",user: { ...firebaseUser } });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Server error" });

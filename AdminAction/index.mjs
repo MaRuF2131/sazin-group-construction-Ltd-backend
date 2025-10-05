@@ -22,10 +22,14 @@ import getAction from './Sazin-construction/mangeAction/getAction.mjs'
 import login from './Auth/login.mjs';
 import register from './Auth/register.mjs';
 import profile_update from './Auth/profile-update.mjs';
+import get_profile from './Auth/get-profile.mjs';
+
+// Routes
 router.use('/sazin-construction/addAction', AddAction);
 router.use('/sazin-construction/manageAction/getAction', getAction);
 router.use('/Auth0777T',login);
 router.use('/Auth0778T',register);
 router.use('/Auth0779T',profile_update);
+router.use('/Auth0780T',get_profile); 
 
 export default router;
