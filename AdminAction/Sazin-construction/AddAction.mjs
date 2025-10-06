@@ -227,7 +227,7 @@ router.post('/add-job',upload.none(), async (req, res) => {
 router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, res) => {
   try {
     const newsData = req.body;
-    const field=["newstitle","description",'author','date','image']
+    const field=["newstitle","description",'author','date']
     const missingFields = field.filter(f => !(f in newsData));
     if (missingFields.length > 0) {
       return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
@@ -275,7 +275,7 @@ router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, r
 router.post('/add-certificate', upload.single('image'),fileCheck("certificate"), async (req, res) => {
   try {
     const certificateData = req.body;
-    const field=["certificateName","image"]
+    const field=["certificateName"]
     const missingFields = field.filter(f => !(f in certificateData));
     if (missingFields.length > 0) {
       return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
@@ -362,8 +362,8 @@ router.post('/add-project', upload.single('image'),fileCheck("project"), async (
   try {
     const projectData = req.body;
     const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
-
-    const field=["date","category","description","title",'image']
+    console.log("category",projectData);
+    const field=["date","category","description","title","feature"]
     const missingFields = field.filter(f => !(f in projectData));
     if (missingFields.length > 0) {
       return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });

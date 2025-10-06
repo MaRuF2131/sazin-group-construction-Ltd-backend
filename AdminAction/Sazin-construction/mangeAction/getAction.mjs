@@ -139,4 +139,171 @@ router.get("/achievement",async(req,res)=>{
   }
 })
 
+router.get("/client",async(req,res)=>{
+  
+    try {
+    const { page = 1, limit = 10 } = req.query;
+
+    // pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // query
+    const cursor = await db.collection("clients").find({})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const clients = await cursor.toArray();
+
+    const total = await db.collection("clients").countDocuments({});
+    
+    res.status(200).json({
+      success: true,
+      data: clients,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching achievement:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+})
+
+router.get("/news",async(req,res)=>{
+  
+    try {
+    const { page = 1, limit = 10 } = req.query;
+
+    // pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // query
+    const cursor = await db.collection("news").find({})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const news = await cursor.toArray();
+
+    const total = await db.collection("news").countDocuments({});
+    
+    res.status(200).json({
+      success: true,
+      data: news,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching news:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+})
+router.get("/service",async(req,res)=>{
+  
+    try {
+    const { page = 1, limit = 10 } = req.query;
+
+    // pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // query
+    const cursor = await db.collection("services").find({})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const services = await cursor.toArray();
+
+    const total = await db.collection("services").countDocuments({});
+    
+    res.status(200).json({
+      success: true,
+      data: services,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching services:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+})
+router.get("/equipment",async(req,res)=>{
+  
+    try {
+    const { page = 1, limit = 10 } = req.query;
+
+    // pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // query
+    const cursor = await db.collection("equipment").find({})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const equipment = await cursor.toArray();
+
+    const total = await db.collection("equipment").countDocuments({});
+    
+    res.status(200).json({
+      success: true,
+      data: equipment,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching services:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+})
+router.get("/jobs",async(req,res)=>{
+  
+    try {
+    const { page = 1, limit = 10 } = req.query;
+
+    // pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // query
+    const cursor = await db.collection("jobs").find({})
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const jobs = await cursor.toArray();
+
+    const total = await db.collection("jobs").countDocuments({});
+    
+    res.status(200).json({
+      success: true,
+      data: jobs,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching jobs:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+})
+
 export default router;
