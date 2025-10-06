@@ -21,3 +21,16 @@ export const uploadToCloudinary = (fileBuffer, folder = "uploads") => {
     streamifier.createReadStream(fileBuffer).pipe(stream);
   });
 };
+
+// utils/CDN/cloudinaryDelete.mjs
+
+export const deleteFromCloudinary = async (publicId) => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result; // { result: 'ok' } হলে delete সফল
+  } catch (error) {
+    console.error("❌ Cloudinary delete failed:", error.message);
+    throw new Error("Failed to delete image from Cloudinary");
+  }
+};
+
