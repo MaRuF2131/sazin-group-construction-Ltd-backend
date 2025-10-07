@@ -45,8 +45,6 @@ let db;
 router.use(verifyJWT);
 router.use(async (req, res, next) => {
   const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
-  // Check if user already exists using emailHash
-      console.log('req.body:', emailHash);
     const existingUser = await adminStatus(emailHash, "active");
     if (!existingUser) {
       return res.status(400).json({ message: "Active admin not found with this email" });

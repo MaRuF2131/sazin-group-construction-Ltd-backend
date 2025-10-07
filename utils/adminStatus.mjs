@@ -9,8 +9,8 @@ let db;
   }
 })();
 
- export const adminStatus = async (emailHash,status) => {
+ export const adminStatus = async (emailHash,status,projection={projection :{ password: 0, __v: 0 }}) => {
     // Check if user already exists using emailHash
-    const existingUser = await db.collection("register").findOne({ email: emailHash, status: status } );
+    const existingUser = await db.collection("register").findOne({ email: emailHash, status: status },projection);
     return existingUser;
  }

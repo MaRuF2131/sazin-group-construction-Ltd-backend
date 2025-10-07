@@ -35,8 +35,7 @@ router.use(async (req, res, next) => {
 try{
   const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
     const existingUser = await adminStatus(emailHash, "active");
-    if (!existingUser) {
-        console.log("kkkkkkkkkk");       
+    if (!existingUser) {     
       return res.status(400).json({ message: "Active admin not found with this email" });
     }
     req.emailHash = emailHash;

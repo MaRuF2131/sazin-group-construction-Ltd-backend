@@ -83,7 +83,7 @@ router.post("/login",upload.none(),async (req, res) => {
           // 🔹 Create email hash for duplicate check
           const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
           // এখানে তুমি database দিয়ে username/password check করবে
-          let user=await adminStatus(emailHash,"active");
+          let user=await adminStatus(emailHash,"active",{projection :{ password: 1, name: 1, imageUrl: 1, email: 1 }});
 
           if (!user) {
             console.log("❌ Active admin not found for email :", emailHash);
