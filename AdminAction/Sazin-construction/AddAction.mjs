@@ -51,6 +51,122 @@ try{
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+const handleNews = async (req, res, next) => {
+  try {
+    const newsData = req.body;
+    const field=["newstitle","description",'author','date']
+    const missingFields = field.filter(f => !(f in newsData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(newsData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
+    // ✅ Mongo safety check
+    if (!looksSafeForMongo(newsData)) {
+      return res.status(400).json({ message: "Unsafe data for MongoDB" });
+    }
+
+    // validation rules (title, description ইত্যাদি)
+    const validations = {
+      newstitle: [[(v) => isSafeString(v, { max: 300 }), "Invalid news title"]],
+      description: [[(v) => isSafeString(v, { max: 5000 }), "Invalid description"]],
+      author: [[(v) => isSafeString(v, { max: 300 }), "Invalid author"]],
+      date: [[(v) => isValidDate(v), "Invalid published date"]],
+    };
+
+   const { isValid, errors } = runValidations(validations, newsData);
+    if (!isValid) {
+      return res.status(400).json({ message: errors });
+    }
+    newsData.date = new Date(newsData.date); // Convert date to Date object;
+    newsData.postedAt = new Date(); // Add postedAt field with current date;
+    req.newsData = newsData;
+    next();
+  } catch (error) {
+    console.error('Error adding news:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+const handlecertificate = async (req, res, next) => {
+  try {
+    const certificateData = req.body;
+    const field=["certificateName"]
+    const missingFields = field.filter(f => !(f in certificateData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(certificateData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
+    // ✅ Mongo safety check
+    if (!looksSafeForMongo(certificateData )) {
+      return res.status(400).json({ message: "Unsafe data for MongoDB" });
+    }
+    
+    // validation rules (title, description ইত্যাদি)
+    const validations = {
+      certificateName : [[(v) => isSafeString(v, { max: 300 }), "Invalid certificate name"]],
+    };
+
+   const { isValid, errors } = runValidations(validations, certificateData );
+    if (!isValid) {
+      return res.status(400).json({ message: errors });
+    }
+    certificateData.postedAt = new Date(); // Add postedAt field with current date;
+    req.certificateData = certificateData;
+    next();
+  } catch (error) {
+    console.error('Error adding certificate:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+const handleproject = async (req, res, next) => {
+  try {
+     const projectData = req.body;
+    const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
+    console.log("category",projectData);
+    const field=["date","category","description","title","feature"]
+    const missingFields = field.filter(f => !(f in projectData));
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
+    }
+    const extraFields = Object.keys(projectData).filter(key => !field.includes(key));
+    if (extraFields.length > 0) {
+      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
+    }
+    // ✅ Mongo safety check
+    if (!looksSafeForMongo(projectData)) {
+      return res.status(400).json({ message: "Unsafe data for MongoDB" });
+    }
+    
+    // validation rules (title, description ইত্যাদি)
+    const validations = {
+      title: [[(v) => isSafeString(v, { max: 300 }), "Invalid project title"]],
+      description: [[(v) => isSafeString(v, { max: 5000 }), "Invalid description"]],
+      category:[[(v) => isSafeString(v, { max: 200 }), "Invalid category"]],
+      date: [[(v) => isValidDate(v), "Invalid  date"]],
+    };
+   if(!ct.includes(projectData?.category))return res.status(400).json({ message: "Catergory Not Under Listed" });
+   if(projectData?.feature==='true')projectData.feature=true;
+   else projectData.feature=false;
+
+   const { isValid, errors } = runValidations(validations, projectData);
+    if (!isValid) {
+      return res.status(400).json({ message: errors });
+    }
+    projectData.date = new Date(projectData.date); // Convert date to Date object;
+    projectData.postedAt = new Date(); // Add postedAt field with current date;
+    req.projectData = projectData;
+    next();
+  } catch (error) {
+    console.error('Error adding project:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 //add service
 router.post('/add-service',upload.none(), async (req, res) => {
   try {
@@ -224,39 +340,9 @@ router.post('/add-job',upload.none(), async (req, res) => {
   }
 });
 //add news
-router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, res) => {
+router.post('/add-news', upload.single('image'),handleNews,fileCheck("news"), async (req, res) => {
   try {
-    const newsData = req.body;
-    const field=["newstitle","description",'author','date']
-    const missingFields = field.filter(f => !(f in newsData));
-    if (missingFields.length > 0) {
-      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
-    }
-    const extraFields = Object.keys(newsData).filter(key => !field.includes(key));
-    if (extraFields.length > 0) {
-      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
-    }
-    // ✅ Mongo safety check
-    if (!looksSafeForMongo(newsData)) {
-      return res.status(400).json({ message: "Unsafe data for MongoDB" });
-    }
-
-    // validation rules (title, description ইত্যাদি)
-    const validations = {
-      newstitle: [[(v) => isSafeString(v, { max: 300 }), "Invalid news title"]],
-      description: [[(v) => isSafeString(v, { max: 5000 }), "Invalid description"]],
-      author: [[(v) => isSafeString(v, { max: 300 }), "Invalid author"]],
-      date: [[(v) => isValidDate(v), "Invalid published date"]],
-    };
-
-   const { isValid, errors } = runValidations(validations, newsData);
-    if (!isValid) {
-      return res.status(400).json({ message: errors });
-    }
-    newsData.date = new Date(newsData.date); // Convert date to Date object;
-    newsData.postedAt = new Date(); // Add postedAt field with current date;
-
- 
+    const newsData = req.newsData;
     if (req.imageData && req.imageData.secure_url) {
       newsData.imageUrl = req.imageData.secure_url;
       newsData.imagePublicId = req.imageData.public_id; // Optional: Store public_id for future deletions
@@ -272,46 +358,20 @@ router.post('/add-news', upload.single('image'),fileCheck("news"), async (req, r
   }
 });
 //add certificate
-router.post('/add-certificate', upload.single('image'),fileCheck("certificate"), async (req, res) => {
+router.post('/add-certificate', upload.single('image'),handlecertificate,fileCheck("certificate"), async (req, res) => {
   try {
-    const certificateData = req.body;
-    const field=["certificateName"]
-    const missingFields = field.filter(f => !(f in certificateData));
-    if (missingFields.length > 0) {
-      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
-    }
-    const extraFields = Object.keys(certificateData).filter(key => !field.includes(key));
-    if (extraFields.length > 0) {
-      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
-    }
-    // ✅ Mongo safety check
-    if (!looksSafeForMongo(certificateData )) {
-      return res.status(400).json({ message: "Unsafe data for MongoDB" });
-    }
-    
-    // validation rules (title, description ইত্যাদি)
-    const validations = {
-      certificateName : [[(v) => isSafeString(v, { max: 300 }), "Invalid certificate name"]],
-    };
-
-   const { isValid, errors } = runValidations(validations, certificateData );
-    if (!isValid) {
-      return res.status(400).json({ message: errors });
-    }
-    certificateData.postedAt = new Date(); // Add postedAt field with current date;
-
- 
+    const certificateData = req.certificateData;
     if (req.imageData && req.imageData.secure_url) {
       certificateData.imageUrl = req.imageData.secure_url;
       certificateData.imagePublicId = req.imageData.public_id; // Optional: Store public_id for future deletions
     }
     const result = await db.collection('certificate').insertOne(certificateData);
     res.status(201).json({
-      message: 'News added successfully',
+      message: 'Certificate added successfully',
       certificateId: result.insertedId,
     });
   } catch (error) {
-    console.error('Error adding news:', error);
+    console.error('Error adding certificate:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
@@ -358,44 +418,9 @@ router.post('/add-achievement',upload.none(), async (req, res) => {
   }
 });
 //add project
-router.post('/add-project', upload.single('image'),fileCheck("project"), async (req, res) => {
+router.post('/add-project', upload.single('image'),handleproject,fileCheck("project"), async (req, res) => {
   try {
-    const projectData = req.body;
-    const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
-    console.log("category",projectData);
-    const field=["date","category","description","title","feature"]
-    const missingFields = field.filter(f => !(f in projectData));
-    if (missingFields.length > 0) {
-      return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
-    }
-    const extraFields = Object.keys(projectData).filter(key => !field.includes(key));
-    if (extraFields.length > 0) {
-      return res.status(400).json({ message: `Unexpected fields: ${extraFields.join(', ')}` });
-    }
-    // ✅ Mongo safety check
-    if (!looksSafeForMongo(projectData)) {
-      return res.status(400).json({ message: "Unsafe data for MongoDB" });
-    }
-    console.log("project",projectData);
-    
-    // validation rules (title, description ইত্যাদি)
-    const validations = {
-      title: [[(v) => isSafeString(v, { max: 300 }), "Invalid project title"]],
-      description: [[(v) => isSafeString(v, { max: 5000 }), "Invalid description"]],
-      category:[[(v) => isSafeString(v, { max: 200 }), "Invalid category"]],
-      date: [[(v) => isValidDate(v), "Invalid  date"]],
-    };
-   if(!ct.includes(projectData?.category))return res.status(400).json({ message: "Catergory Not Under Listed" });
-   if(projectData?.feature==='true')projectData.feature=true;
-   else projectData.feature=false;
-
-   const { isValid, errors } = runValidations(validations, projectData);
-    if (!isValid) {
-      return res.status(400).json({ message: errors });
-    }
-    projectData.date = new Date(projectData.date); // Convert date to Date object;
-    projectData.postedAt = new Date(); // Add postedAt field with current date;
-
+    const projectData = req?.projectData;
  
     if (req.imageData && req.imageData.secure_url) {
       projectData.imageUrl = req.imageData.secure_url;
@@ -403,11 +428,11 @@ router.post('/add-project', upload.single('image'),fileCheck("project"), async (
     }
     const result = await db.collection('project').insertOne(projectData);
     res.status(201).json({
-      message: 'News added successfully',
+      message: 'Project added successfully',
       projectId: result.insertedId,
     });
   } catch (error) {
-    console.error('Error adding news:', error);
+    console.error('Error adding project:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
