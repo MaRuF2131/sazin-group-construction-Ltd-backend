@@ -32,7 +32,6 @@ router.use(async (req, res, next) => {
     if (!existingUser) {
       return res.status(403).json({ message: "Unauthorized or inactive admin" });
     }
-    req.emailHash = emailHash;
     next();
   } catch (err) {
     console.error("❌ Middleware error:", err);
