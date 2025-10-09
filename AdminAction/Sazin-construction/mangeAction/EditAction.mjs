@@ -1,11 +1,11 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { upload } from '../../utils/uploadConfig.mjs';
-import { fileCheck } from '../../utils/filecheck.mjs';
-import mongo from '../../MongoDB.mjs';
+import { upload } from '../../../utils/uploadConfig.mjs';
+import { fileCheck } from '../../../utils/filecheck.mjs';
+import mongo from '../../../MongoDB.mjs';
 import CryptoJS from "crypto-js";
-import verifyJWT from '../../utils/VerifyJWT.mjs';
-import { adminStatus } from '../../utils/adminStatus.mjs';
+import verifyJWT from '../../../utils/VerifyJWT.mjs';
+import { adminStatus } from '../../../utils/adminStatus.mjs';
 import { 
   isSafeString,
   isValidDate,
@@ -13,7 +13,7 @@ import {
   looksSafeForMongo,
   runValidations,
   sanitizeMiddleware,
- } from '../../utils/validationCheck.mjs';
+ } from '../../../utils/validationCheck.mjs';
 import { ObjectId } from 'mongodb';
 dotenv.config();
 const router = express.Router();
@@ -398,10 +398,11 @@ router.post('/update-news/:id', upload.single('image'),handleNewsUpdate,fileChec
           console.error("⚠️ Cloudinary delete error:", cloudErr.message);
         }
       }
-    }
-    const result = await db.collection('news').updateOne({ _id: new ObjectId(req.params.id) }, { $set: newsData });
-    if(result.matchedCount===0){
-      return res.status(404).json({ message: "news not found" });
+    }else{
+        const result = await db.collection('news').updateOne({ _id: new ObjectId(req.params.id) }, { $set: newsData });
+        if(result.matchedCount===0){
+          return res.status(404).json({ message: "news not found" });
+        }
     }
     res.status(201).json({
       message: 'News updated successfully',
@@ -433,11 +434,12 @@ router.post('/add-certificate/:id', upload.single('image'),handlecertificateUpda
         }
       }
 
-    }
-     const result = await db.collection('certificate').updateOne({ _id: new ObjectId(req.params.id) }, { $set: certificateData });
-    if(result.matchedCount===0){
-      return res.status(404).json({ message: "certificate not found" });
-    }
+    }else{
+        const result = await db.collection('certificate').updateOne({ _id: new ObjectId(req.params.id) }, { $set: certificateData });
+        if(result.matchedCount===0){
+          return res.status(404).json({ message: "certificate not found" });
+        }
+      }
     res.status(201).json({
       message: 'certificate added successfully',
       certificateId: req.params.id,
@@ -517,10 +519,11 @@ router.post('/update-project/:id', upload.single('image'),handleprojectUpdate,fi
         }
       }
 
-    }
-  const result = await db.collection('project').updateOne({ _id: new ObjectId(req.params.id) }, { $set: projectData });
-    if(result.matchedCount===0){
-      return res.status(404).json({ message: "project not found" });
+    }else{
+      const result = await db.collection('project').updateOne({ _id: new ObjectId(req.params.id) }, { $set: projectData });
+      if(result.matchedCount===0){
+        return res.status(404).json({ message: "project not found" });
+      }
     }
     res.status(200).json({
       message: 'Project updated successfully',

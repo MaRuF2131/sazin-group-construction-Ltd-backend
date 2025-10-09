@@ -63,7 +63,7 @@ router.get("/manage-admin", async (req, res) => {
 router.post("/manage-admin",async (req,res)=>{
     try {
         const { uid,email,status} = req.body;
-        if (!uid || ! new ObjectId(uid) || !email || !status) {
+        if (!uid || ! ObjectId.isValid(uid) || !email || !status) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -95,10 +95,10 @@ router.post("/manage-admin",async (req,res)=>{
 router.delete("/manage-admin", async (req, res) => {
   try {
     const userId = req?.query?.uid;
-    if(!userId || ! new ObjectId(userId)){
+    if(!userId || ! ObjectId.isValid(userId)){
         return res.status(400).json({ message: "Invalid user ID" });
     }
-    const deletionResult = await db.collection('register').deleteOne({ _id: new ObjectId(userId), email: { $ne: req.emailHash } });
+    const deletionResult = await db.collection('register').findOneAndDelete({ _id: new ObjectId(userId), email: { $ne: req.emailHash }},{projection: { imagePublicId: 1 }, returnDocument: "before" } );
     if (deletionResult.deletedCount === 0) {
       return res.status(404).json({ message: "Admin not found or cannot delete own account" });
     }

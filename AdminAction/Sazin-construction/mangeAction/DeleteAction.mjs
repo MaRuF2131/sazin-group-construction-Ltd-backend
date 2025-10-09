@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import express from "express";
-import mongo from "../../MongoDB.mjs";
+import mongo from "../../../MongoDB.mjs";
 import CryptoJS from "crypto-js";
-import verifyJWT from "../../utils/VerifyJWT.mjs";
-import { adminStatus } from "../../utils/adminStatus.mjs";
+import verifyJWT from "../../../utils/VerifyJWT.mjs";
+import { adminStatus } from "../../../utils/adminStatus.mjs";
 import { ObjectId } from "mongodb";
-import { deleteFromCloudinary } from "../../../utils/CDN/cloudinaryDelete.mjs"; // ✅ সঠিক ফাইল
+import { deleteFromCloudinary } from "../../../utils/CDN/cloudinaryUpload.mjs"; 
 dotenv.config();
 
 const router = express.Router();

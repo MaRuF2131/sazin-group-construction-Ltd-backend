@@ -19,15 +19,21 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
 import AddAction from './Sazin-construction/AddAction.mjs';
 import getAction from './Sazin-construction/mangeAction/getAction.mjs'
+import deleteAction from './Sazin-construction/mangeAction/DeleteAction.mjs'
+import editAction from './Sazin-construction/mangeAction/EditAction.mjs'
 import login from './Auth/login.mjs';
 import register from './Auth/register.mjs';
 import profile_update from './Auth/profile-update.mjs';
 import get_profile from './Auth/get-profile.mjs';
 import manageAdmin from './Auth/manageAdmin.mjs';
 
+
 // Routes
 router.use('/sazin-construction/addAction', AddAction);
 router.use('/sazin-construction/manageAction/getAction', getAction);
+router.use('/sazin-construction/manageAction/deleteAction', deleteAction);
+router.use('/sazin-construction/manageAction/editAction', editAction);
+
 router.use('/Auth0777T',login);
 router.use('/Auth0778T',register);
 router.use('/Auth0779T',profile_update);

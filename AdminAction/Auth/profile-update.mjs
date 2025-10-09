@@ -146,21 +146,38 @@ router.post("/profile-update",upload.single('profileImageFile'), Handler, fileCh
       console.log('Image uploaded:', req.imageData.secure_url);
       encryptedData.imageUrl = req.imageData.secure_url;
       encryptedData.imagePublicId = req.imageData.public_id;
-    }
-    // Update user
-    let result = await db.collection("register").updateOne({
-      email: req?.emailHash,
-      status: "active"
-    }, {
-      $set: {
-        ...encryptedData,
-      }
-    });
+      const result = await db.collection('register').findOneAndUpdate(
+          {       
+          email: req?.emailHash,
+          status: "active" 
+          }, 
+          { $set:encryptedData },
+          {projection: { imagePublicId: 1 }, returnDocument: "before" });
+          if(!result?.value){
+            return res.status(404).json({ message: "admin not found" });
+          }
+          if(result.value?.imagePublicId){
+            try {
+              await deleteFromCloudinary(result.value.imagePublicId);
+              console.log(`🗑️ Cloudinary image deleted for profile:`, result.value.imagePublicId);
+            } catch (cloudErr) {
+              console.error("⚠️ Cloudinary delete error:", cloudErr.message);
+            }
+          }
+    }else{
+        let result = await db.collection("register").updateOne({
+          email: req?.emailHash,
+          status: "active"
+        }, {
+          $set: {
+            ...encryptedData,
+          }
+        });
 
-    if (result?.matchedCount === 0) {
-      return res.status(401).json({ success: false, message: "active admin not found with this email" });
-    }
-
+        if (result?.matchedCount === 0) {
+          return res.status(401).json({ success: false, message: "active admin not found with this email" });
+        }
+     }
     // Generate new JWT
      const username=decryptData(encryptedData?.name, secretKey);
      const userEmail=encryptData(req?.user?.userEmail, decryptKey);

@@ -38,7 +38,7 @@ router.get("/profile", async (req, res) => {
       return res.status(401).json({ message: "User not found" });
     }
     user.email=CryptoJS.AES.encrypt(req?.user?.userEmail, process.env.DEC).toString();
-    user.name=CryptoJS.AES.decrypt(user.name, process.env.ENC).toString(CryptoJS.enc.Utf8);
+    user.name=CryptoJS.AES.decrypt(user?.name, process.env.ENC).toString(CryptoJS.enc.Utf8);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
     console.log(error);
