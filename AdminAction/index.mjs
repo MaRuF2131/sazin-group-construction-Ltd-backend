@@ -26,6 +26,9 @@ import register from './Auth/register.mjs';
 import profile_update from './Auth/profile-update.mjs';
 import get_profile from './Auth/get-profile.mjs';
 import manageAdmin from './Auth/manageAdmin.mjs';
+import ChangePass from './Auth/changePass.mjs'
+import ForgottenPass from './Auth/forgottenPass.mjs'
+import logout from './Auth/logout.mjs'
 
 
 // Routes
@@ -39,5 +42,8 @@ router.use('/Auth0778T',register);
 router.use('/Auth0779T',profile_update);
 router.use('/Auth0780T',get_profile);
 router.use('/Auth0781T',manageAdmin);
+router.use('/Auth0782T',ChangePass);
+router.use('/Auth0783T',ForgottenPass);
+router.use('/Auth0784T',logout);
 
 export default router;

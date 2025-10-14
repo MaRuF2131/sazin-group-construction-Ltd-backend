@@ -47,12 +47,18 @@ try{
 });
 
 router.get("/manage-admin", async (req, res) => {
-  try {    
+  try {  
+      
     const allAdmins = await db.collection('register').find({ email: { $ne: req.emailHash } }, { projection: { password: 0, __v: 0 } }).toArray();
         allAdmins.forEach(admin => {
           admin.eem = CryptoJS.AES.decrypt(admin?.eem, process.env.ENC).toString(CryptoJS.enc.Utf8);
           admin.name = CryptoJS.AES.decrypt(admin?.name, process.env.ENC).toString(CryptoJS.enc.Utf8);
     });
+    if(!allAdmins){
+      return res.status(400).json({message:"Admin not found"})
+    }
+    console.log(allAdmins);
+    
     res.status(200).json({ admins: allAdmins });
   } catch (error) {
     console.error('Error fetching admin data:', error);
@@ -67,16 +73,16 @@ router.post("/manage-admin",async (req,res)=>{
             return res.status(400).json({ message: "All fields are required" });
         }
 
-       const dcryptEmail=CryptoJS.AES.decrypt(email, process.env.DEC).toString(CryptoJS.enc.Utf8);
+/*        const dcryptEmail=CryptoJS.AES.decrypt(email, process.env.DEC).toString(CryptoJS.enc.Utf8); */
 
-        if(!isValidEmail(dcryptEmail)){
+        if(!isValidEmail(email)){
             return res.status(400).json({ message: "Invalid email format" });
         }
-        if(!["active","reject"].includes(status)){
+        if(!["active","rejected"].includes(status)){
             return res.status(400).json({ message: "Invalid status value" });
         }
          
-       const emailHash=CryptoJS.SHA256(dcryptEmail).toString(CryptoJS.enc.Hex);
+       const emailHash=CryptoJS.SHA256(email).toString(CryptoJS.enc.Hex);
        const updateResult = await db.collection('register').updateOne(
         { _id: new ObjectId(uid), email: emailHash  },
         { $set:{status:status}}
@@ -95,13 +101,25 @@ router.post("/manage-admin",async (req,res)=>{
 router.delete("/manage-admin", async (req, res) => {
   try {
     const userId = req?.query?.uid;
+    
     if(!userId || ! ObjectId.isValid(userId)){
         return res.status(400).json({ message: "Invalid user ID" });
     }
     const deletionResult = await db.collection('register').findOneAndDelete({ _id: new ObjectId(userId), email: { $ne: req.emailHash }},{projection: { imagePublicId: 1 }, returnDocument: "before" } );
-    if (deletionResult.deletedCount === 0) {
-      return res.status(404).json({ message: "Admin not found or cannot delete own account" });
+    console.log(deletionResult);
+    
+    if (deletionResult?.value) {
+        return res.status(404).json({ message: "Admin not found or cannot delete own account" });
     }
+    if(deletionResult.value?.imagePublicId){
+            try {
+              await deleteFromCloudinary(result.value.imagePublicId);
+              console.log(`🗑️ Cloudinary image deleted for profile:`, result.value.imagePublicId);
+            } catch (cloudErr) {
+              console.error("⚠️ Cloudinary delete error:", cloudErr.message);
+            }
+          }
+  res.status(200).json({ message: "Deleted succesfully" })        
 } catch (error) {
     console.error('Error deleting admin:', error);
     res.status(500).json({ message: "Internal server error" });
