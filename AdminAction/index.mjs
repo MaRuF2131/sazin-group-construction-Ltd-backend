@@ -17,10 +17,17 @@ router.use(
 );
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
+
 import AddAction from './Sazin-construction/AddAction.mjs';
 import getAction from './Sazin-construction/mangeAction/getAction.mjs'
 import deleteAction from './Sazin-construction/mangeAction/DeleteAction.mjs'
 import editAction from './Sazin-construction/mangeAction/EditAction.mjs'
+
+import AddProduct from './Helmets&Safety/AddAction.mjs'
+import GetProduct from './Helmets&Safety/mangeAction/getAction.mjs'
+import DeleteProduct from './Helmets&Safety/mangeAction/DeleteAction.mjs'
+import EditProduct from './Helmets&Safety/mangeAction/EditAction.mjs'
+
 import login from './Auth/login.mjs';
 import register from './Auth/register.mjs';
 import profile_update from './Auth/profile-update.mjs';
@@ -36,6 +43,11 @@ router.use('/sazin-construction/addAction', AddAction);
 router.use('/sazin-construction/manageAction/getAction', getAction);
 router.use('/sazin-construction/manageAction/deleteAction', deleteAction);
 router.use('/sazin-construction/manageAction/editAction', editAction);
+
+router.use('/Helmets&Safety/addAction',AddProduct)
+router.use('/Helmets&Safety/getAction',GetProduct)
+router.use('/Helmets&Safety/deleteAction',DeleteProduct)
+router.use('/Helmets&Safety/editAction',EditProduct)
 
 router.use('/Auth0777T',login);
 router.use('/Auth0778T',register);
