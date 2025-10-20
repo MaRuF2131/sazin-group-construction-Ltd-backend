@@ -17,6 +17,7 @@ import {
  } from '../../utils/validationCheck.mjs';
 import verifyJWT from '../../utils/VerifyJWT.mjs';
 import { adminStatus } from '../../utils/adminStatus.mjs';
+import { deleteFromCloudinary } from '../../utils/CDN/cloudinaryUpload.mjs';
 dotenv.config();
 const router = express.Router();
 const secretKey = process.env.ENC;
@@ -65,19 +66,19 @@ router.use(async (req, res, next) => {
     };
 
 const  Handler = async(req, res, next) => {
-     try {
-        // bot submission check
-        if(req?.body?.id !=="MSTTAMANNAAKTERTOMA"){
+  try {
+     // bot submission check
+    if(req?.body?.id !=="MSTTAMANNAAKTERTOMA"){
           return res.status(401).json({ message: "bot submission detected" });
         }
 
     const field=["name","email","phone","position","department","company","location","joinDate","bio","linkedin","twitter"]
     const encryptedData = Object.fromEntries(
       Object.entries(req.body)
-        .filter(([key, value]) => {
+        .filter(([key,value]) => {
           if (field.includes(key)) return true; 
         })
-        .map(([key, value]) => [key, value])
+        .map(([key,value]) => [key,value])
     );
 
     const missingFields = field.filter(f => !(f in encryptedData));
@@ -85,7 +86,7 @@ const  Handler = async(req, res, next) => {
       return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
     }
 
-     const decryptField=["name","email"]
+    const decryptField=["name","email"]
 
     // Decrypt each field
     const decryptedData = Object.fromEntries(Object.entries(encryptedData).map(([key, value]) => {
@@ -127,6 +128,7 @@ const  Handler = async(req, res, next) => {
     // Encrypt sensitive fields before storing
       const enc = encryptData(encryptedData?.name);
       encryptedData.name = enc;
+      encryptedData.eem=encryptData(encryptedData?.email);
       delete encryptedData.email; // Remove email from data to be stored
       req.encryptedData = encryptedData;
     next();
@@ -153,13 +155,13 @@ router.post("/profile-update",upload.single('profileImageFile'), Handler, fileCh
           }, 
           { $set:encryptedData },
           {projection: { imagePublicId: 1 }, returnDocument: "before" });
-          if(!result?.value){
+          if(!result){
             return res.status(404).json({ message: "admin not found" });
           }
-          if(result.value?.imagePublicId){
+          if(result?.imagePublicId){
             try {
-              await deleteFromCloudinary(result.value.imagePublicId);
-              console.log(`🗑️ Cloudinary image deleted for profile:`, result.value.imagePublicId);
+              await deleteFromCloudinary(result?.imagePublicId);
+              console.log(`🗑️ Cloudinary image deleted for profile:`, result?.imagePublicId);
             } catch (cloudErr) {
               console.error("⚠️ Cloudinary delete error:", cloudErr.message);
             }

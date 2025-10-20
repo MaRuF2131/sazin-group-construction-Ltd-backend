@@ -99,7 +99,6 @@ const  Handler = async(req, res, next) => {
     // 🔹 Create email hash for duplicate check
     encryptedData.eem=encryptedData?.email;
     const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
-    encryptedData.email = emailHash;
 
     // Check if user already exists using emailHash
     const existingUser = await db.collection("register").findOne({ email: emailHash });

@@ -9,6 +9,7 @@ import {
 import verifyJWT from '../../utils/VerifyJWT.mjs';
 import { adminStatus } from '../../utils/adminStatus.mjs';
 import { ObjectId } from 'mongodb';
+import { deleteFromCloudinary } from '../../utils/CDN/cloudinaryUpload.mjs';
 dotenv.config();
 const router = express.Router();
 router.use(express.json());
@@ -58,7 +59,7 @@ router.get("/manage-admin", async (req, res) => {
       return res.status(400).json({message:"Admin not found"})
     }
     console.log(allAdmins);
-    
+       
     res.status(200).json({ admins: allAdmins });
   } catch (error) {
     console.error('Error fetching admin data:', error);
@@ -106,16 +107,17 @@ router.delete("/manage-admin", async (req, res) => {
         return res.status(400).json({ message: "Invalid user ID" });
     }
     const deletionResult = await db.collection('register').findOneAndDelete({ _id: new ObjectId(userId), email: { $ne: req.emailHash }},{projection: { imagePublicId: 1 }, returnDocument: "before" } );
-    console.log(deletionResult);
+
+    console.log("ddddddd",deletionResult);
     
-    if (deletionResult?.value) {
+    if (!deletionResult) {
         return res.status(404).json({ message: "Admin not found or cannot delete own account" });
     }
-    if(deletionResult.value?.imagePublicId){
+    if(deletionResult?.imagePublicId){
             try {
-              await deleteFromCloudinary(result.value.imagePublicId);
-              console.log(`🗑️ Cloudinary image deleted for profile:`, result.value.imagePublicId);
-            } catch (cloudErr) {
+              await deleteFromCloudinary(deletionResult?.imagePublicId);
+              console.log(`🗑️ Cloudinary image deleted for profile:`, deletionResult?.imagePublicId);
+            } catch (cloudErr){
               console.error("⚠️ Cloudinary delete error:", cloudErr.message);
             }
           }
