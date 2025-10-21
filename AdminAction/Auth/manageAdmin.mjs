@@ -62,7 +62,7 @@ router.get("/manage-admin", async (req, res) => {
        
     res.status(200).json({ admins: allAdmins });
   } catch (error) {
-    console.error('Error fetching admin data:', error);
+    console.error('Error fetc;n  dg hing admin data:', error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

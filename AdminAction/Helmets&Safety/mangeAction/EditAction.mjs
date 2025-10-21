@@ -63,6 +63,7 @@ const handleproductUpdate = async (req, res, next) => {
     const productData = req.body;
     productData.hasDiscount=productData?.hasDiscount || false;
     productData.isFeatured=productData?.isFeatured || false;
+    productData.discountPercent=productData?.discountPercent || 0
     delete productData.image;
     const ct=[
         "Welding Helmets & Gloves",

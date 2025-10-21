@@ -64,16 +64,16 @@ const deleteHandler = (collection, options = { hasImage: false }) => {
 
       // ফলাফল চেক
       const deleted =
-        options.hasImage && doc.value ? true : doc.deletedCount && doc.deletedCount > 0;
+        options.hasImage && doc ? true : doc.deletedCount && doc.deletedCount > 0;
       if (!deleted) {
         return res.status(404).json({ message: `${collection} not found` });
       }
 
       // Cloudinary থেকে ইমেজ ডিলিট
-      if (options.hasImage && doc.value?.imagePublicId) {
+      if (options.hasImage && doc?.imagePublicId) {
         try {
-          await deleteFromCloudinary(doc.value.imagePublicId);
-          console.log(`🗑️ Cloudinary image deleted for ${collection}:`, doc.value.imagePublicId);
+          await deleteFromCloudinary(doc?.imagePublicId);
+          console.log(`🗑️ Cloudinary image deleted for ${collection}:`, doc?.imagePublicId);
         } catch (cloudErr) {
           console.error("⚠️ Cloudinary delete error:", cloudErr.message);
         }
