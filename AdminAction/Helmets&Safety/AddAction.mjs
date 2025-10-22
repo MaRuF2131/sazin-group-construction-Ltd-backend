@@ -44,7 +44,7 @@ try{
       return res.status(400).json({ message: "Active admin not found with this email" });
     }
     req.emailHash = emailHash;
-  next();
+    next();
   }catch(err){
     console.error('Middleware error:', err);
     res.status(500).json({ message: "Internal server error" });

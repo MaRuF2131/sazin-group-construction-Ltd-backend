@@ -17,7 +17,6 @@ let db;
 (async () => {
   try {
     db = await mongo();
-    console.log("✅ MongoDB connected for delete routes");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
   }

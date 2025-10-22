@@ -13,7 +13,6 @@ let db;
 (async () => {
   try {
     db = await mongo();
-    console.log("✅ MongoDB connected for admin data routes");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
   }
