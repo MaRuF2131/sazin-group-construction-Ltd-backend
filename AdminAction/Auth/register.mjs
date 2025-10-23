@@ -126,7 +126,7 @@ router.post("/register",upload.single('image'), Handler, fileCheck("profile"),as
       encryptedData.imagePublicId = req.imageData.public_id;
     } else {
         // Default profile image
-        encryptedData.imageUrl = "https://yourdomain.com/default-profile.png"; // এখানে default URL দিন
+        encryptedData.imageUrl = "https://res.cloudinary.com/drexcxkuq/image/upload/v1761113234/project/c8dvhojyj0nwzm9hkfer.webp"; // এখানে default URL দিন
         encryptedData.imagePublicId = null; // কোনো public_id নেই
       }
 
