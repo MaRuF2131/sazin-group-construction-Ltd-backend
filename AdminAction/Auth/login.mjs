@@ -128,7 +128,7 @@ router.post("/login",upload.none(),async (req, res) => {
         }); */
 
     // Success
-    res.status(200).json({ success: true, message: "Login successful", /* user: { ...firebaseUser } */ });
+    res.status(200).json({ success: true,skey:secretKey,dkey:decryptKey,  message: "Login successful", /* user: { ...firebaseUser } */ });
   } catch (error) {
     console.log(error); 
     res.status(500).json({ success: false, message: "Server error" });
