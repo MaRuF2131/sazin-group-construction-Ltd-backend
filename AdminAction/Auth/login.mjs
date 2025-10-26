@@ -100,11 +100,11 @@ router.post("/login",upload.none(),async (req, res) => {
          user.email=encryptedData?.email;
 
         // JWT token create
-        const token = jwt.sign(
+/*         const token = jwt.sign(
          { uid: user?._id, username: user?.name, userEmail: user?.email },
            jwtSecret,
          { expiresIn: "7d" }
-        );
+        ); */
 
         const firebaseUser = {
         uid: user?._id,
