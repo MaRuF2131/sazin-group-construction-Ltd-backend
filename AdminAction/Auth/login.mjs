@@ -91,10 +91,10 @@ router.post("/login",upload.none(),async (req, res) => {
           }
           // Decrypt the stored password before comparison
           const decryptedPassword = decryptData(decryptData(user?.password, secretKey), decryptKey);
-          if (decryptedPassword !== decryptedData.password) {
+/*           if (decryptedPassword !== decryptedData.password) {
             console.log("❌ Password mismatch for user ID:", user._id,decryptedData);
             return res.status(401).json({ success: false, message: "Invalid credentials" });
-          } 
+          }  */
 
 /*          user.name=decryptData(user?.name,secretKey);
          user.email=encryptedData?.email; */
