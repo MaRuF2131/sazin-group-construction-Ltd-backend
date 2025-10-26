@@ -92,6 +92,7 @@ router.post("/login",upload.none(),async (req, res) => {
           if (!user?.password) {
              return res.status(500).json({ success: false,skey:secretKey,dkey:decryptKey, message: "Encrypted password missing" });
             }
+            const decryptedPassword = decryptData(user?.password, secretKey);
           // Decrypt the stored password before comparison
           /* const decryptedPassword = decryptData(decryptData(user?.password, secretKey), decryptKey); */
 /*           if (decryptedPassword !== decryptedData.password) {
@@ -128,7 +129,7 @@ router.post("/login",upload.none(),async (req, res) => {
         }); */
 
     // Success
-    res.status(200).json({ success: true,skey:secretKey,dkey:decryptKey,  message: "Login successful", /* user: { ...firebaseUser } */ });
+    res.status(200).json({ success: true,skey:secretKey,decryptedPassword:decryptedPassword,dkey:decryptKey,  message: "Login successful", /* user: { ...firebaseUser } */ });
   } catch (error) {
     console.log(error); 
     res.status(500).json({ success: false, message: "Server error" });
