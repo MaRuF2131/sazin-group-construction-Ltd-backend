@@ -115,14 +115,14 @@ router.post("/login",upload.none(),async (req, res) => {
         createdAt: user?.createdAt || new Date(),
         };
 
-        // Set cookie
+/*         // Set cookie
         res.cookie("token", token, {
               httpOnly: true,
               secure: process.env.NODE_ENV === 'production',
               sameSite:"none",
               path: '/',
               maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        }); */
 
     // Success
     res.status(200).json({ success: true, message: "Login successful", user: { ...firebaseUser } });
