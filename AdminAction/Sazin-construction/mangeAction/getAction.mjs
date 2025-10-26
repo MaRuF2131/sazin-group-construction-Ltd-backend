@@ -45,7 +45,7 @@ const fetchData = async (collectionName, req, res, options = {}) => {
 
     // Optional filters (for project collection)
     if (collectionName === "project") {
-      const allowedCategories = ["Civil", "Electro", "Engineering-Procurement", "Safe&Security"];
+      const allowedCategories = ["Civil","Electro","Engineering-Procurement","Safe&Security","NHA","PGCB","PWD","Agro","BPC", "EED", "LGED"];
       if (allowedCategories.includes(category)) filter.category = category;
       if (isFeature !== undefined) filter.feature = isFeature === "true";
     }
@@ -53,7 +53,7 @@ const fetchData = async (collectionName, req, res, options = {}) => {
     const collection = db.collection(collectionName);
 
     const [data, total] = await Promise.all([
-      collection.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }).toArray(),
+      collection.find(filter).skip(skip).limit(parseInt(limit)).sort({ postedAt: -1 }).toArray(),
       collection.countDocuments(filter),
     ]);
 

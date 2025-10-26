@@ -63,13 +63,13 @@ const fetchData = async (collectionName, req, res, options = {}) => {
         "Full Face"
     ];
       if (allowedCategories.includes(category)) filter.category = category;
-      if (isFeature !== undefined) filter.isFeature = isFeature === "true";
+      if (isFeature !== undefined) filter.isFeatured = isFeature === "true";
     }
 
     const collection = db.collection(collectionName);
 
     const [data, total] = await Promise.all([
-      collection.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }).toArray(),
+      collection.find(filter).skip(skip).limit(parseInt(limit)).sort({ postedAt: -1 }).toArray(),
       collection.countDocuments(filter),
     ]);
 

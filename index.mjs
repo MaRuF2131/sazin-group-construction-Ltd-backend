@@ -21,7 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 import AdminAction from './AdminAction/index.mjs';
+import UserAction from './UserAction/getAction.mjs'
 app.use('/admin-action', AdminAction);
+app.use('/userAction',UserAction);
 
 /// listening
 app.listen(port, () => {

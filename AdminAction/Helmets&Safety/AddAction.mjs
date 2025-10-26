@@ -53,7 +53,7 @@ try{
 
 const handleproduct = async (req, res, next) => {
   try {
-     const productData = req.body;
+    const productData = req.body;
     const ct=[
         "Welding Helmets & Gloves",
         "Fall Protection Harness",
@@ -71,6 +71,10 @@ const handleproduct = async (req, res, next) => {
         "Full Face"
     ]
     console.log("category",productData);
+    productData.hasDiscount=productData?.hasDiscount || false;
+    productData.isFeatured=productData?.isFeatured || false;
+    productData.discountPercent=productData?.discountPercent || 0
+
     const field=["discountPercent","isFeatured","hasDiscount","price","category","description","title","productName"]
     const missingFields = field.filter(f => !(f in productData));
     if (missingFields.length > 0) {

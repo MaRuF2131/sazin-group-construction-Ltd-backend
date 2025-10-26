@@ -143,7 +143,7 @@ const handleprojectUpdate = async (req, res, next) => {
 
     const projectData = req.body;
     delete projectData.image;
-    const ct=["Civil","Electro","Engineering-Procurement","Safe&Security"]
+    const ct=["Civil","Electro","Engineering-Procurement","Safe&Security","NHA","PGCB","PWD","Agro","BPC", "EED", "LGED"]
     console.log("category",projectData);
     const field=["date","category","description","title","feature"]
     const missingFields = field.filter(f => !(f in projectData));
@@ -239,7 +239,7 @@ router.put('/update-equipment/:id',upload.none(), async (req, res) => {
     const id=req?.params?.id;
     if(!id)return res.status(400).json({ message: "Equipment ID is required" });
     if(!new ObjectId(id))return res.status(400).json({ message: "Invalid Equipment ID" });
-    const field=["equipment"]
+    const field=["equipment","description"]
     const missingFields = field.filter(f => !(f in equipmentData));
     if (missingFields.length > 0) {
       return res.status(400).json({ message: `Missing fields: ${missingFields.join(', ')}` });
@@ -257,6 +257,7 @@ router.put('/update-equipment/:id',upload.none(), async (req, res) => {
     // validation rules (title, description ইত্যাদি)
     const validations = {
       equipment: [[(v) => isSafeString(v, { max: 2000 }), "Invalid equipment name"]],
+      description: [[(v) => isSafeString(v, { max: 2000 }), "Invalid description name"]],
     };
 
    const { isValid, errors } = runValidations(validations, equipmentData);
