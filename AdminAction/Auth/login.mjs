@@ -92,7 +92,7 @@ router.post("/login",upload.none(),async (req, res) => {
           if (!user?.password) {
              return res.status(500).json({ success: false,skey:secretKey,dkey:decryptKey, message: "Encrypted password missing" });
             }
-            const decryptedPassword = decryptData(user?.password, secretKey);
+            const decryptedPassword = user?.password;
           // Decrypt the stored password before comparison
           /* const decryptedPassword = decryptData(decryptData(user?.password, secretKey), decryptKey); */
 /*           if (decryptedPassword !== decryptedData.password) {
