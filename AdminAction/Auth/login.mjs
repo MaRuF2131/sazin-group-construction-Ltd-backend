@@ -96,8 +96,8 @@ router.post("/login",upload.none(),async (req, res) => {
             return res.status(401).json({ success: false, message: "Invalid credentials" });
           }
 
-         user.name=decryptData(user?.name,secretKey);
-         user.email=encryptedData?.email;
+/*          user.name=decryptData(user?.name,secretKey);
+         user.email=encryptedData?.email; */
 
         // JWT token create
 /*         const token = jwt.sign(
@@ -106,14 +106,14 @@ router.post("/login",upload.none(),async (req, res) => {
          { expiresIn: "7d" }
         ); */
 
-        const firebaseUser = {
+/*         const firebaseUser = {
         uid: user?._id,
         username: user?.name,
         photoURL: user?.imageUrl,
         email: user?.email ,
         token: token,
         createdAt: user?.createdAt || new Date(),
-        };
+        }; */
 
 /*         // Set cookie
         res.cookie("token", token, {
