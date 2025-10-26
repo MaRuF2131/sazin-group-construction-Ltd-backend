@@ -26,6 +26,10 @@ app.use('/admin-action', AdminAction);
 app.use('/userAction',UserAction);
 
 /// listening
-app.listen(port, () => {
+/*  app.listen(port, () => {
   console.log(`🚀 Server is running on http://localhost:${port}`);
+});  */
+app.get('/', (req, res) => {
+  res.send('Server is running');
 });
+export default app;
