@@ -11,7 +11,6 @@ import {
   runValidations,
   sanitizeMiddleware,
  } from '../../utils/validationCheck.mjs';
-import e from 'express';
 dotenv.config();
 const router = express.Router();
 const secretKey = process.env.ENC;

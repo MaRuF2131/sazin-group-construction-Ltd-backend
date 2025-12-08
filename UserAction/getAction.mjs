@@ -31,6 +31,9 @@ const fetchData = async (collectionName, req, res, options = {}) => {
       if (allowedCategories.includes(category)) filter.category = category;
       if (isFeature !== undefined) filter.feature = isFeature === "true";
     }
+    if (collectionName === "jobs") {
+       filter.deadline={ $gte: new Date() }; 
+    }
 
     const collection = db.collection(collectionName);
 

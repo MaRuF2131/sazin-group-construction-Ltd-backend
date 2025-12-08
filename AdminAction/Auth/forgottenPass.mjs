@@ -14,6 +14,7 @@ import {
   sanitizeMiddleware,
 } from '../../utils/validationCheck.mjs';
 import { mailSender } from '../../utils/mailSender.mjs';
+import verifyJWT from '../../utils/VerifyJWT.mjs';
 
 dotenv.config();
 const router = express.Router();
@@ -22,6 +23,22 @@ const decryptKey = process.env.DEC;
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
+
+router.use(verifyJWT);
+router.use(async (req, res, next) => {
+try{
+  const emailHash = CryptoJS.SHA256(req?.user?.userEmail).toString(CryptoJS.enc.Hex);
+    const existingUser = await adminStatus(emailHash, "active");
+    if (!existingUser) {     
+      return res.status(400).json({ message: "Active admin not found with this email" });
+    }
+    req.emailHash = emailHash;
+  next();
+  }catch(err){
+    console.error('Middleware error:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 // Apply sanitizer to all routes
 router.use(
@@ -92,6 +109,9 @@ router.post("/forgottenPass/request", upload.none(), async (req, res) => {
     if (!isValid) return res.status(400).json({ message: errors });
 
     const emailHash = CryptoJS.SHA256(decryptedData.email).toString(CryptoJS.enc.Hex);
+    if(emailHash!==req.emailHash){
+      return res.status(400).json({ message: "Email mismatch" });
+    }
 
     const user = await adminStatus(emailHash, "active", { projection: { email: 1 } });
 

@@ -22,13 +22,18 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 import AdminAction from './AdminAction/index.mjs';
 import UserAction from './UserAction/getAction.mjs'
+import ContactAction from './UserAction/contact.mjs'
+import jobApply from './UserAction/jobApply.mjs'
 app.use('/admin-action', AdminAction);
 app.use('/userAction',UserAction);
+app.use('/userAction/mail',ContactAction);
+app.use('/userAction/job',jobApply);
 
-/// listening
-/*  app.listen(port, () => {
+
+/// listen
+ app.listen(port, () => {
   console.log(`🚀 Server is running on http://localhost:${port}`);
-});  */
+}); 
 app.get('/', (req, res) => {
   res.send('Server is running');
 });

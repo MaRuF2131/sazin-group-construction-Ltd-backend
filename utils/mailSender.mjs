@@ -3,7 +3,6 @@ import nodemailer from 'nodemailer';
 dotenv.config();
 
 export  const mailSender=async()=>{
-   console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS, process.env.TO_EMAIL);
    const transporter = nodemailer.createTransport({
     service: "gmail",
     host: 'smtp.gmail.com' , 
