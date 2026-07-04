@@ -79,7 +79,7 @@ const  Handler = async(req, res, next) => {
       password: [[(v) => isSafeString(v, { max: 2000 }), "Invalid password"]],
       confirmPassword: [[(v) => isSafeString(v, { max: 2000 }), "Invalid password"]],
     };
-
+     console.log('Decrypted Data:', decryptedData); // Debugging line
     const { isValid, errors } = runValidations(validations, decryptedData);
     if (!isValid) return res.status(400).json({ message: errors });
 

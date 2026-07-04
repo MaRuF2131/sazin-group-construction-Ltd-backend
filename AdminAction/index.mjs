@@ -37,6 +37,8 @@ import ChangePass from './Auth/changePass.mjs'
 import ForgottenPass from './Auth/forgottenPass.mjs'
 import logout from './Auth/logout.mjs'
 
+ import sazinValvesRouter from './sazin-valves/index.mjs'; 
+
 
 // Routes
 router.use('/sazin-construction/addAction', AddAction);
@@ -48,6 +50,8 @@ router.use('/Helmets&Safety/addAction',AddProduct)
 router.use('/Helmets&Safety/getAction',GetProduct)
 router.use('/Helmets&Safety/deleteAction',DeleteProduct)
 router.use('/Helmets&Safety/editAction',EditProduct)
+
+ router.use('/sazin-valves', sazinValvesRouter); 
 
 router.use('/Auth0777T',login);
 router.use('/Auth0778T',register);
