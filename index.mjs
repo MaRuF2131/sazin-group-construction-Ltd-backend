@@ -24,16 +24,18 @@ app.use(express.urlencoded({ extended: true }));
 import UserAction from './UserAction/getAction.mjs'
 import ContactAction from './UserAction/contact.mjs'
 import jobApply from './UserAction/jobApply.mjs'
+import sazinValves from'./UserAction/sazinValves.mjs'
 app.use('/admin-action', AdminAction);
 app.use('/userAction',UserAction);
 app.use('/userAction/mail',ContactAction);
 app.use('/userAction/job',jobApply); 
+app.use('/userAction/sazin-valves',sazinValves);
 
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
 /// listen
- app.listen(port, () => {
+/*  app.listen(port, () => {
   console.log(`🚀 Server is running on http://localhost:${port}`);
-}); 
+});  */
 export default app;
